@@ -1,0 +1,24 @@
+{
+  "name": "hcc-qa-automation",
+  "version": "1.0.0",
+  "description": "Test automation for HCC (5280 Human Care Center) EMR Portal",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen https://emr.eva.5280humancarecenter.com/counselor/clinician/login",
+    "test:smoke": "playwright test --grep @p0",
+    "test:regression": "playwright test --grep @p1"
+  },
+  "keywords": ["playwright", "test-automation", "e2e", "qa", "hcc"],
+  "author": "SAGA",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.5"
+  }
+}
