@@ -2,6 +2,19 @@
  * Data Factories - Generate test data with sensible defaults for HCC
  */
 
+/** Returns a string of n random lowercase letters (for names that must be letters/hyphens/apostrophes only). */
+export function randomLetters(n: number): string {
+  return Array.from({ length: n }, () =>
+    String.fromCharCode(97 + Math.floor(Math.random() * 26))
+  ).join('');
+}
+
+/** Returns a unique phone number in (XXX) XXX-XXXX format for Add User form (avoids duplicate-phone validation). */
+export function uniquePhoneNumber(): string {
+  const suffix = Date.now().toString().slice(-7).padStart(7, '0');
+  return `(555) ${suffix.slice(0, 3)}-${suffix.slice(3)}`;
+}
+
 export const createPatient = (overrides: Partial<Patient> = {}): Patient => {
   const timestamp = Date.now();
   return {
@@ -15,6 +28,21 @@ export const createPatient = (overrides: Partial<Patient> = {}): Patient => {
   };
 };
 
+/** Client data for Create Client form (e.g. Clients → Add Client). */
+export function createClientForForm(overrides: { firstName?: string; lastName?: string; dateOfBirth?: string } = {}): {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+} {
+  const suffix = randomLetters(6);
+  return {
+    firstName: 'Test',
+    lastName: `Client${suffix}`,
+    dateOfBirth: '1990-01-01',
+    ...overrides,
+  };
+}
+
 export const createClinician = (overrides: Partial<Clinician> = {}): Clinician => {
   const timestamp = Date.now();
   return {
@@ -26,6 +54,24 @@ export const createClinician = (overrides: Partial<Clinician> = {}): Clinician =
     ...overrides,
   };
 };
+
+/** Clinician-like data for Add User form: first/last name are letters-only (app validation); phone is unique. */
+export function createUserForAddUserForm(overrides: { email?: string; phone?: string } = {}): {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+} {
+  const suffix = randomLetters(6);
+  const timestamp = Date.now();
+  return {
+    firstName: 'Test',
+    lastName: `User${suffix}`,
+    email: `e2e-user-${timestamp}@hcc.com`,
+    phone: uniquePhoneNumber(),
+    ...overrides,
+  };
+}
 
 export const createAppointment = (overrides: Partial<Appointment> = {}): Appointment => {
   const timestamp = Date.now();

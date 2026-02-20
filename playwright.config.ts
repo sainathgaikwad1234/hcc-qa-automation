@@ -29,6 +29,7 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
+      timeout: 180000,
     },
     {
       name: 'chromium',
@@ -37,6 +38,12 @@ export default defineConfig({
         storageState: '.auth/user.json',
       },
       dependencies: ['setup'],
+      testIgnore: [/e2e\/auth\/.*\.spec\.ts/],
+    },
+    {
+      name: 'chromium-no-auth',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: [/e2e\/auth\/.*\.spec\.ts/],
     },
   ],
 });
