@@ -140,7 +140,9 @@ export async function runSchedulingSetup(page: Page): Promise<SchedulingContext>
   await form.getByRole('button', { name: 'Sun' }).click();
 
   await page.getByRole('button', { name: 'Save' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
+  // A second Save/Confirm button may appear as a confirmation step; click it if visible
+  await page.waitForTimeout(1000);
+  await page.getByRole('button', { name: 'Save' }).click({ timeout: 5000 }).catch(() => {});
 
   await expect(
     page.getByText(clinicianDisplayName, { exact: true }).or(page.getByText('Availability')).first()

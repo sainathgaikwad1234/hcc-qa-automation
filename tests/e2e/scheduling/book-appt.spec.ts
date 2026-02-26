@@ -59,7 +59,10 @@ test.describe('Scheduling - Book Appointment @p1', () => {
 
   test('2 - should show Calendar and booking entry point', async ({ authenticatedPage: page }) => {
     await page.getByRole('button', { name: 'Scheduling' }).click();
-    await page.locator('div').filter({ hasText: /^Calendar$/ }).click();
+    await page.getByRole('menuitem', { name: 'Calendar' })
+      .or(page.locator('div').filter({ hasText: /^Calendar$/ }))
+      .first()
+      .click();
     await expect(page.getByText('Calendar').first()).toBeVisible({ timeout: 15000 });
   });
 
@@ -68,9 +71,19 @@ test.describe('Scheduling - Book Appointment @p1', () => {
 
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Scheduling' }).or(page.locator('button').filter({ hasText: /^Scheduling$/ })).first().click({ force: true });
-    await page.waitForTimeout(1000);
-    await page.locator('div').filter({ hasText: /^Calendar$/ }).first().click({ force: true, timeout: 15000 });
+    // Wait for the main nav to be in an interactable state before clicking Scheduling
+    await page.getByRole('button', { name: 'Scheduling' })
+      .or(page.locator('button').filter({ hasText: /^Scheduling$/ }))
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .catch(() => {});
+    await page.getByRole('button', { name: 'Scheduling' }).or(page.locator('button').filter({ hasText: /^Scheduling$/ })).first().click();
+    await page.waitForTimeout(1500);
+    await page.getByRole('menuitem', { name: 'Calendar' })
+      .or(page.locator('li').filter({ hasText: /^Calendar$/ }))
+      .or(page.locator('div').filter({ hasText: /^Calendar$/ }))
+      .first()
+      .click({ timeout: 15000 });
     await page.getByRole('button', { name: /Book Appointment|New Appointment|Schedule/i }).click({ timeout: 10000 }).catch(() => {});
 
     await page.getByRole('combobox', { name: /Clinician|Select Clinician/i }).click();

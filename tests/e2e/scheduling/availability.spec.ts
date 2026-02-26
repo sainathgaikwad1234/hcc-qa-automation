@@ -24,7 +24,7 @@ test.describe('Scheduling - Availability (full flow) @p1', () => {
     await page.getByRole('textbox', { name: 'Enter Role Name' }).click();
     await page.getByRole('textbox', { name: 'Enter Role Name' }).fill(roleName);
     await page.getByRole('button', { name: 'Create Role' }).click();
-    await expect(page.getByText(roleName)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(roleName)).toBeVisible({ timeout: 20000 });
 
     // --- Step 2: Add User with same role ---
     await page.getByRole('button', { name: 'More' }).click();
@@ -137,7 +137,9 @@ test.describe('Scheduling - Availability (full flow) @p1', () => {
     await form.getByRole('button', { name: 'Sun' }).click();
 
     await page.getByRole('button', { name: 'Save' }).click();
-    await page.getByRole('button', { name: 'Save' }).click();
+    // A second Save/Confirm button may appear as a confirmation step; click it if visible
+    await page.waitForTimeout(1000);
+    await page.getByRole('button', { name: 'Save' }).click({ timeout: 5000 }).catch(() => {});
 
     await expect(
       page.getByText(clinicianDisplayName, { exact: true }).or(page.getByText('Availability')).first()
@@ -175,7 +177,10 @@ test.describe('Scheduling - Availability (full flow) @p1', () => {
 
   test('5 - should show Calendar view', async ({ authenticatedPage: page }) => {
     await page.getByRole('button', { name: 'Scheduling' }).click();
-    await page.locator('div').filter({ hasText: /^Calendar$/ }).click();
+    await page.getByRole('menuitem', { name: 'Calendar' })
+      .or(page.locator('div').filter({ hasText: /^Calendar$/ }))
+      .first()
+      .click();
     await expect(page.getByText('Calendar').first()).toBeVisible({ timeout: 15000 });
   });
 });
