@@ -5,6 +5,7 @@
  */
 import { test, expect } from '../../fixtures/merged-fixtures';
 import { runSchedulingSetup } from './helpers/scheduling-setup';
+import { openCreateClientPage } from './helpers/create-client-helpers';
 import { createClientForForm } from '../../fixtures/test-data';
 
 test.describe('Scheduling - Book Appointment @p1', () => {
@@ -16,14 +17,14 @@ test.describe('Scheduling - Book Appointment @p1', () => {
 
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Clients' }).click();
-    await page.getByRole('button', { name: 'Clients' }).click();
-    await page.getByRole('button', { name: 'New Client' }).click();
-    await page.getByRole('textbox', { name: /First Name|first name/i }).first().fill(client.firstName);
-    await page.getByRole('textbox', { name: /Last Name|last name/i }).first().fill(client.lastName);
-    const dobField = page.getByRole('textbox', { name: /Date of Birth|DOB|Birth/i }).or(page.getByLabel(/Date of Birth|DOB/i)).first();
-    await dobField.fill(client.dateOfBirth).catch(() => {});
-    await page.getByRole('button', { name: 'Save' }).click();
+    await openCreateClientPage(page);
+    const first = page.getByRole('textbox', { name: /First Name|first name/i }).or(page.getByLabel(/First Name|first name/i)).first();
+    await first.fill(client.firstName);
+    const last = page.getByRole('textbox', { name: /Last Name|last name/i }).or(page.getByLabel(/Last Name|last name/i)).first();
+    await last.fill(client.lastName);
+    const dobField = page.getByRole('textbox', { name: /Date of Birth|DOB|Birth/i }).or(page.getByLabel(/Date of Birth|DOB/i)).or(page.getByPlaceholder(/MM\/DD\/YYYY|date/i)).first();
+    await dobField.fill(client.dateOfBirth);
+    await page.getByRole('button', { name: /Save|Create|Submit/i }).first().click();
     await expect(page.getByText(client.lastName).first()).toBeVisible({ timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(1000);
 

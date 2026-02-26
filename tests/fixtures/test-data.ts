@@ -28,17 +28,37 @@ export const createPatient = (overrides: Partial<Patient> = {}): Patient => {
   };
 };
 
-/** Client data for Create Client form (e.g. Clients → Add Client). */
-export function createClientForForm(overrides: { firstName?: string; lastName?: string; dateOfBirth?: string } = {}): {
+/** Client data for Create Client form (e.g. Clients → Add Client). DOB in MM/DD/YYYY for US date inputs. */
+export function createClientForForm(overrides: {
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  email?: string;
+  phone?: string;
+  addressLine1?: string;
+  city?: string;
+  zip?: string;
+} = {}): {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  email: string;
+  phone: string;
+  addressLine1: string;
+  city: string;
+  zip: string;
 } {
   const suffix = randomLetters(6);
+  const timestamp = Date.now();
   return {
     firstName: 'Test',
     lastName: `Client${suffix}`,
-    dateOfBirth: '1990-01-01',
+    dateOfBirth: '01/01/1990',
+    email: `e2e-client-${timestamp}@mailinator.com`,
+    phone: uniquePhoneNumber(),
+    addressLine1: '123 Test St',
+    city: 'Denver',
+    zip: '80202',
     ...overrides,
   };
 }
