@@ -59,7 +59,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
       - name: Run full regression
-        run: npx playwright test --browser=${{ matrix.browser }}
+        run: npx playwright test --project=${{ matrix.browser }} --project=${{ matrix.browser }}-no-auth
         env:
           BASE_URL: ${{ secrets.QA_BASE_URL }}
           LOGIN_URL: ${{ secrets.QA_LOGIN_URL }}

@@ -45,5 +45,33 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: [/e2e\/auth\/.*\.spec\.ts/],
     },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: [/e2e\/auth\/.*\.spec\.ts/],
+    },
+    {
+      name: 'firefox-no-auth',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: [/e2e\/auth\/.*\.spec\.ts/],
+    },
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: [/e2e\/auth\/.*\.spec\.ts/],
+    },
+    {
+      name: 'webkit-no-auth',
+      use: { ...devices['Desktop Safari'] },
+      testMatch: [/e2e\/auth\/.*\.spec\.ts/],
+    },
   ],
 });
