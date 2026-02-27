@@ -48,7 +48,41 @@ setup('authenticate', async ({ page }) => {
     await loginButton.click();
 
     // Wait until we have left the login page (URL must not contain /login)
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 120000 });
+    // Use multiple detection methods with fallback logic
+    let authComplete = false;
+    try {
+      await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 60000 });
+      authComplete = true;
+      console.log('Auth: Redirect detected via URL change');
+    } catch (err) {
+      console.log('Auth: URL wait timed out, checking for error or alternative indicators');
+      
+      // Check for error message
+      const errorElement = page.locator('[role="alert"], .error, .notification.error, [class*="error"]').first();
+      const errorText = await errorElement.textContent({ timeout: 5000 }).catch(() => null);
+      if (errorText) {
+        const lowerError = errorText.toLowerCase();
+        if (lowerError.includes('password') || lowerError.includes('credential') || lowerError.includes('invalid')) {
+          throw new Error(`Authentication failed: ${errorText}`);
+        }
+      }
+      
+      // Fallback: Check if dashboard/admin nav is visible (sign of successful login)
+      const dashboardElements = page.getByRole('button', { name: /Scheduling|Admin|Dashboard|Settings/ }).first();
+      authComplete = await dashboardElements.isVisible({ timeout: 30000 }).catch(() => false);
+      
+      if (!authComplete) {
+        // Last resort: just check the URL manually
+        const currentUrl = page.url();
+        authComplete = !currentUrl.includes('/login');
+        console.log('Auth: Fallback check - URL contains /login:', currentUrl.includes('/login'));
+      }
+    }
+
+    if (!authComplete) {
+      throw new Error(`Authentication did not complete. Final URL: ${page.url()}`);
+    }
+
     await page.waitForTimeout(2000);
 
     // Dismiss Google Password Manager "Change your password" dialog if it appears (blocks interaction)

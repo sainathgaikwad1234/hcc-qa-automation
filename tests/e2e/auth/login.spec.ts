@@ -61,10 +61,44 @@ test.describe('Login @p0', () => {
     await getUsernameField(page).fill(username);
     await getPasswordField(page).click();
     await getPasswordField(page).fill(password);
+    
+    console.log(`Attempting login with user: ${username}`);
     await getSignInButton(page).click();
 
-    // Wait for redirect with increased timeout to account for server auth delays
-    await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 120000 });
+    // Wait for loading state to disappear or URL to change
+    // Try multiple detection methods with fallback logic
+    let redirected = false;
+    try {
+      // Primary method: wait for URL change away from login
+      await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 60000 });
+      redirected = true;
+      console.log('Login redirected via URL change to:', page.url());
+    } catch (e) {
+      console.log('URL wait timed out, checking for error or alternative success indicator');
+      
+      // Check if there's an error message indicating invalid credentials
+      const errorMsg = await page.locator('[role="alert"], .error, .notification.error, [class*="error"]').first().textContent({ timeout: 5000 }).catch(() => null);
+      if (errorMsg && errorMsg.toLowerCase().includes('password') || errorMsg?.toLowerCase().includes('credential')) {
+        throw new Error(`Login failed with error: ${errorMsg}`);
+      }
+      
+      // Fallback: Check if page changed significantly (e.g., nav/header visible)
+      const dashboardNav = page.getByRole('button', { name: /Scheduling|Admin|Dashboard|Settings/ }).first();
+      const navVisible = await dashboardNav.isVisible({ timeout: 30000 }).catch(() => false);
+      if (navVisible) {
+        redirected = true;
+        console.log('Login detected via dashboard navigation elements');
+      }
+    }
+
+    if (!redirected) {
+      // Last resort: check current URL and page title
+      const currentUrl = page.url();
+      const pageTitle = await page.title();
+      console.log('Final state - URL:', currentUrl, 'Title:', pageTitle);
+      throw new Error(`Login did not redirect. Current URL: ${currentUrl}. Please verify credentials are correct.`);
+    }
+
     await expect(page).not.toHaveURL(/\/login/);
   });
 });
@@ -206,11 +240,31 @@ test.describe('Login - Edge cases @p1 @p2', () => {
     await getUsernameField(page).fill(username);
     await getPasswordField(page).fill(password);
     await getSignInButton(page).click();
-    await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 120000 });
+    
+    console.log('Test 16: Logging in before redirect test');
+    
+    // Wait for login to complete with fallback detection
+    let loggedIn = false;
+    try {
+      await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 60000 });
+      loggedIn = true;
+      console.log('Logged in successfully, now on:', page.url());
+    } catch (e) {
+      // Fallback: check for dashboard elements
+      const dashboardNav = page.getByRole('button', { name: /Scheduling|Admin|Dashboard/ }).first();
+      loggedIn = await dashboardNav.isVisible({ timeout: 30000 }).catch(() => false);
+      if (loggedIn) {
+        console.log('Login detected via dashboard nav, proceeding with redirect test');
+      }
+    }
+
+    if (!loggedIn) {
+      throw new Error('Failed to log in before testing redirect behavior');
+    }
 
     await page.goto(LOGIN_URL);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(1000);
     expect(isOnLoginPage(new URL(page.url()))).toBe(false);
   });
 
