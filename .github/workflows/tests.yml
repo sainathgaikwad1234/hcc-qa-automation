@@ -23,13 +23,14 @@ jobs:
         run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+      - name: Create .env file
+        run: |
+          echo "BASE_URL=${{ secrets.QA_BASE_URL }}" > .env
+          echo "LOGIN_URL=${{ secrets.QA_LOGIN_URL }}" >> .env
+          echo "QA_USERNAME=${{ secrets.QA_USERNAME }}" >> .env
+          echo "QA_PASSWORD=${{ secrets.QA_PASSWORD }}" >> .env
       - name: Run P0 smoke tests
         run: npx playwright test --grep @p0
-        env:
-          BASE_URL: ${{ secrets.QA_BASE_URL }}
-          LOGIN_URL: ${{ secrets.QA_LOGIN_URL }}
-          QA_USERNAME: ${{ secrets.QA_USERNAME }}
-          QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -58,13 +59,14 @@ jobs:
         run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+      - name: Create .env file
+        run: |
+          echo "BASE_URL=${{ secrets.QA_BASE_URL }}" > .env
+          echo "LOGIN_URL=${{ secrets.QA_LOGIN_URL }}" >> .env
+          echo "QA_USERNAME=${{ secrets.QA_USERNAME }}" >> .env
+          echo "QA_PASSWORD=${{ secrets.QA_PASSWORD }}" >> .env
       - name: Run full regression
         run: npx playwright test --project=${{ matrix.browser }} --project=${{ matrix.browser }}-no-auth
-        env:
-          BASE_URL: ${{ secrets.QA_BASE_URL }}
-          LOGIN_URL: ${{ secrets.QA_LOGIN_URL }}
-          QA_USERNAME: ${{ secrets.QA_USERNAME }}
-          QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
