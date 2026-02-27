@@ -18,10 +18,18 @@ test.describe('Scheduling - Book Appointment @p1', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
     await openCreateClientPage(page);
+    
+    // Wait for the form to be fully loaded before interacting
+    await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {});
+    await page.waitForTimeout(2000);
+    
     const first = page.getByRole('textbox', { name: /First Name|first name/i }).or(page.getByLabel(/First Name|first name/i)).first();
+    await first.waitFor({ state: 'visible', timeout: 60000 });
     await first.fill(client.firstName);
+    
     const last = page.getByRole('textbox', { name: /Last Name|last name/i }).or(page.getByLabel(/Last Name|last name/i)).first();
     await last.fill(client.lastName);
+    
     const dobField = page.getByRole('textbox', { name: /Date of Birth|DOB|Birth/i }).or(page.getByLabel(/Date of Birth|DOB/i)).or(page.getByPlaceholder(/MM\/DD\/YYYY|date/i)).first();
     await dobField.fill(client.dateOfBirth);
     await page.getByRole('button', { name: /Save|Create|Submit/i }).first().click();
@@ -86,7 +94,13 @@ test.describe('Scheduling - Book Appointment @p1', () => {
       .click({ timeout: 15000 });
     await page.getByRole('button', { name: /Book Appointment|New Appointment|Schedule/i }).click({ timeout: 10000 }).catch(() => {});
 
-    await page.getByRole('combobox', { name: /Clinician|Select Clinician/i }).click();
+    // Wait for the appointment form to fully load
+    await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {});
+    await page.waitForTimeout(2000);
+    
+    const clinicianSelect = page.getByRole('combobox', { name: /Clinician|Select Clinician/i });
+    await clinicianSelect.waitFor({ state: 'visible', timeout: 60000 });
+    await clinicianSelect.click();
     await page.getByText(schedulingContext.clinicianDisplayName, { exact: true }).click();
 
     await page.getByRole('button', { name: 'Choose date' }).first().click();

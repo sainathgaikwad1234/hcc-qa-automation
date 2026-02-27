@@ -18,11 +18,19 @@ test.describe('Scheduling - Create Group @p1', () => {
     await page.getByRole('button', { name: /Groups/i }).or(page.locator('button').filter({ hasText: /^Groups$/ })).first().click();
     await page.getByRole('button', { name: /Add Group|Add New Group|New Group|Create Group/i }).or(page.getByText(/Add.*Group/i)).first().click({ timeout: 15000 });
 
-    await page.getByRole('textbox', { name: /Group Name|Name/i }).first().fill(groupName);
+    // Wait for form to load before interacting with fields
+    await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {});
+    await page.waitForTimeout(2000);
+    
+    const nameField = page.getByRole('textbox', { name: /Group Name|Name/i }).first();
+    await nameField.waitFor({ state: 'visible', timeout: 60000 });
+    await nameField.fill(groupName);
+    
     // The form may have two clinician comboboxes (primary + secondary); use the first one.
     // Wait briefly for the dropdowns to become enabled (they may load async).
     await page.waitForTimeout(1500);
     const clinicianCombo = page.getByRole('combobox', { name: /Clinician|Select Clinician/i }).first();
+    await clinicianCombo.waitFor({ state: 'visible', timeout: 60000 });
     await clinicianCombo.click();
     await page.getByText(schedulingContext.clinicianDisplayName, { exact: true }).click();
 
