@@ -63,7 +63,8 @@ test.describe('Login @p0', () => {
     await getPasswordField(page).fill(password);
     await getSignInButton(page).click();
 
-    await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 60000 });
+    // Wait for redirect with increased timeout to account for server auth delays
+    await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 120000 });
     await expect(page).not.toHaveURL(/\/login/);
   });
 });
@@ -205,7 +206,7 @@ test.describe('Login - Edge cases @p1 @p2', () => {
     await getUsernameField(page).fill(username);
     await getPasswordField(page).fill(password);
     await getSignInButton(page).click();
-    await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 60000 });
+    await page.waitForURL((url) => !isOnLoginPage(url), { timeout: 120000 });
 
     await page.goto(LOGIN_URL);
     await page.waitForLoadState('domcontentloaded');

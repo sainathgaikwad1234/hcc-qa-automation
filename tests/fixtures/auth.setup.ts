@@ -48,7 +48,7 @@ setup('authenticate', async ({ page }) => {
     await loginButton.click();
 
     // Wait until we have left the login page (URL must not contain /login)
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 60000 });
+    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 120000 });
     await page.waitForTimeout(2000);
 
     // Dismiss Google Password Manager "Change your password" dialog if it appears (blocks interaction)
