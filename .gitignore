@@ -14,6 +14,7 @@ playwright/.cache/
 .auth/
 *.json
 !package.json
+!package-lock.json
 !tsconfig.json
 
 # IDE
