@@ -59,17 +59,29 @@ test.describe('Treatments - Create Treatment @p1', () => {
     await page.getByRole('textbox', { name: 'Enter cost per session' }).fill('10');
     await page.getByRole('textbox', { name: 'Enter session length' }).fill('10');
     await page.getByRole('button', { name: 'Create Treatment' }).click();
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
     
-    // Now edit it
-    await page.getByRole('textbox', { name: 'Search Code or Description' }).fill(treatmentCode);
-    await page.waitForTimeout(2000);
+    // Go back to treatments list to find and edit
+    await page.getByRole('button', { name: 'Treatments' }).click();
+    await page.getByRole('menu').getByText('Treatments').click();
+    await page.waitForLoadState('networkidle');
     
+    // Search for the treatment and wait for results
+    const searchBox = page.getByRole('textbox', { name: 'Search Code or Description' });
+    await searchBox.fill(treatmentCode);
+    await page.waitForTimeout(1500);
+    
+    // Wait for the row to be visible in the table
     const row = page.getByRole('row').filter({ hasText: treatmentCode }).first();
-    const editButton = row.getByRole('button').first();
-    await editButton.waitFor({ state: 'visible', timeout: 15000 });
+    await row.waitFor({ state: 'visible', timeout: 15000 });
+    await row.scrollIntoViewIfNeeded();
+    
+    // Find and click edit button
+    const editButton = row.locator('button').first();
+    await editButton.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
     await editButton.click();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     
     await page.getByRole('textbox', { name: 'Enter a description...' }).click();
     await page.getByRole('textbox', { name: 'Enter a description...' }).clear();
